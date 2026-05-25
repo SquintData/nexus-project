@@ -1,0 +1,23 @@
+# Pinned for Python 3.11/3.12 — all wheels available, no MSVC needed
+openai==1.54.4
+groq==0.11.0
+supabase==2.9.1
+gotrue==2.9.3
+postgrest==0.17.2
+realtime==2.0.6
+storage3==0.8.2
+supafunc==0.6.2
+python-dotenv==1.0.1
+SpeechRecognition==3.10.4
+vosk==0.3.45
+sounddevice==0.5.1
+numpy==1.26.4
+scipy==1.14.1
+soundfile==0.12.1
+pyautogui==0.9.54
+psutil==5.9.8
+rich==13.9.4
+websockets==13.1
+torch==2.5.1
+torchaudio==2.5.1
+playsound==1.2.2

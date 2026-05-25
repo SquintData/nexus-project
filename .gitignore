@@ -1,0 +1,49 @@
+# Env
+.env
+.env.local
+.env.*.local
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+build/
+dist/
+agent/logs/*.log
+
+# Node
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.spec
+agent/build/
+agent/dist/
+
+# Supabase CLI (migrations/ stays versioned, temp/branches don't)
+supabase/.temp/
+supabase/.branches/
+supabase/seed.sql
+
+# Vosk models — baixar separadamente via setup script
+agent/models/
+
+# Claude Code internal files
+.claude/
+frontend/.claude/
+frontend/MEMORY.md
+frontend/feedback_caveman.md
+frontend/project_nexus.md
+frontend/user_profile.md

@@ -1,0 +1,25 @@
+{
+  "allowed_apps": {
+    "calc": "calc.exe",
+    "calculadora": "calc.exe",
+    "notepad": "notepad.exe",
+    "bloco de notas": "notepad.exe",
+    "vscode": "code.cmd",
+    "vs code": "code.cmd",
+    "visual studio code": "code.cmd",
+    "chrome": "chrome.exe",
+    "google chrome": "chrome.exe",
+    "firefox": "firefox.exe",
+    "edge": "msedge.exe",
+    "microsoft edge": "msedge.exe",
+    "spotify": "spotify:",
+    "steam": "steam://open/main",
+    "discord": "discord://",
+    "telegram": "tg://",
+    "explorer": "explorer.exe",
+    "explorador": "explorer.exe",
+    "terminal": "wt.exe",
+    "powershell": "powershell.exe",
+    "cmd": "cmd.exe"
+  }
+}
