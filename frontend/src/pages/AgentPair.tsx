@@ -206,17 +206,15 @@ function HowToTab({ onGoToPair }: { onGoToPair: () => void }) {
         </Step>
 
         <Step n={2} title="Baixe o agente">
-          Clique no link abaixo para baixar o agente como um arquivo ZIP:
+          Clique no botão abaixo para baixar o agente. Um arquivo ZIP vai aparecer
+          na sua pasta de Downloads.
           <div className="mt-2">
             <a
               href="https://github.com/SquintData/nexus-agent/archive/refs/heads/master.zip"
               className="btn btn-secondary inline-block text-sm"
             >
-              Baixar nexus-agent.zip
+              Baixar Nexus Agent
             </a>
-          </div>
-          <div className="text-xs text-white/40 mt-1">
-            Caso o link peça login no GitHub, entre com a conta que foi convidada para acessar o agente.
           </div>
         </Step>
 
