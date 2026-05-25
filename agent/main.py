@@ -66,16 +66,17 @@ class NexusAgent:
         self.allowed_apps: dict[str, str] = local.get("allowed_apps", {})
 
         self.db = NexusDB(self.cfg)
-        self.stt = GroqSTT(self.cfg.groq_api_key, self.cfg.stt_model)
-        self.tts = OpenAITTS(self.cfg.openai_api_key, self.cfg.tts_model, self.cfg.tts_voice)
-        self.llm = LLMOrchestrator(self.cfg.openai_api_key, self.cfg.llm_model)
+        get_token = self.db.get_access_token
+        self.stt = GroqSTT(self.cfg.stt_proxy_url, get_token, self.cfg.stt_model)
+        self.tts = OpenAITTS(self.cfg.tts_proxy_url, get_token, self.cfg.tts_model, self.cfg.tts_voice)
+        self.llm = LLMOrchestrator(self.cfg.llm_proxy_url, get_token, self.cfg.llm_model)
         self.wake = WakeWordDetector(self.cfg.vosk_model_path, self.cfg.wake_word)
         console.print("[dim]Loading Silero VAD ...[/]")
         self.vad = SileroVAD(sample_rate=SAMPLE_RATE)
         self.tools: ToolHandlers | None = None
         self.audio_q: queue.Queue = queue.Queue()
         self._mic_muted = False  # True while TTS is playing → discard mic chunks
-        self.chat_llm = LLMOrchestrator(self.cfg.openai_api_key, self.cfg.llm_model)
+        self.chat_llm = LLMOrchestrator(self.cfg.llm_proxy_url, get_token, self.cfg.llm_model)
         self._stop_chat = threading.Event()
         self._chat_msg_queue: queue.Queue = queue.Queue()
 

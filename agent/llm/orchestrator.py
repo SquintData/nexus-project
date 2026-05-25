@@ -1,4 +1,9 @@
-"""LLM orchestrator with OpenAI tool_calls (multi-tool, parallel, two-pass)."""
+"""LLM orchestrator with OpenAI tool_calls (multi-tool, parallel, two-pass).
+
+Routes every call through the Supabase llm-proxy Edge Function. The agent never
+holds an OpenAI key — `get_token` returns the current user JWT, which the proxy
+validates before forwarding to OpenAI with the server-side secret.
+"""
 from __future__ import annotations
 
 import json
@@ -11,11 +16,18 @@ from agent.llm.tools import SYSTEM_PROMPT, build_tools_schema
 
 
 class LLMOrchestrator:
-    def __init__(self, api_key: str, model: str = "gpt-4o-mini"):
-        self.client = OpenAI(api_key=api_key)
+    def __init__(self, proxy_url: str, get_token: Callable[[], str], model: str = "gpt-4o-mini"):
+        self.proxy_url = proxy_url
+        self.get_token = get_token
         self.model = model
         self.session_history: list[dict] = []
         self._system_prompt: str | None = None
+
+    def _client(self) -> OpenAI:
+        # Fresh client per turn so JWT refreshes are picked up. The OpenAI SDK
+        # appends `/chat/completions` to base_url, which matches what the proxy
+        # ignores (it forwards any POST to OpenAI's chat endpoint).
+        return OpenAI(api_key=self.get_token(), base_url=self.proxy_url)
 
     def reset_session(self) -> None:
         self.session_history = []
@@ -122,10 +134,13 @@ class LLMOrchestrator:
 
         executed: list[dict] = []
 
+        # One fresh client per turn — JWT is current at call time.
+        client = self._client()
+
         # Loop: each round may call tools; stops when LLM returns no tool_calls.
         # Supports sequential chains (get_tasks → update_task) and parallel tools.
         for _round in range(5):
-            response = self.client.chat.completions.create(
+            response = client.chat.completions.create(
                 model=self.model,
                 messages=self._safe_history(),  # defensive sanitize before every call
                 tools=tools,
