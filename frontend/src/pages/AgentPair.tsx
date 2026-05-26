@@ -219,20 +219,30 @@ function HowToTab({ onGoToPair }: { onGoToPair: () => void }) {
           </div>
         </Step>
 
-        <Step n={3} title="Extraia o ZIP">
-          Clique com o botão direito no arquivo baixado e escolha{" "}
+        <Step n={3} title="Desbloqueie o arquivo">
+          Antes de extrair: clique com o botão direito no arquivo ZIP baixado e
+          escolha <strong className="text-white">"Propriedades"</strong>. Na parte
+          inferior da janela, se aparecer a mensagem{" "}
+          <em>"Este arquivo veio de outro computador"</em>, marque{" "}
+          <strong className="text-white">"Desbloquear"</strong> e clique em{" "}
+          <strong className="text-white">OK</strong>. Esse passo evita que o Windows
+          bloqueie os arquivos na hora de rodar.
+        </Step>
+
+        <Step n={4} title="Extraia o ZIP">
+          Agora clique com o botão direito no arquivo ZIP e escolha{" "}
           <strong className="text-white">"Extrair tudo"</strong>. Anote a pasta onde
           você extraiu — você vai precisar dela depois.
         </Step>
 
-        <Step n={4} title="Rode o setup">
+        <Step n={5} title="Rode o setup">
           Abra a pasta extraída e dê um{" "}
           <strong className="text-white">duplo clique em setup.bat</strong>. Uma
           janela preta vai abrir e instalar tudo automaticamente. Aguarde até
           aparecer a mensagem de conclusão e feche a janela.
         </Step>
 
-        <Step n={5} title="Gere o código de pareamento">
+        <Step n={6} title="Gere o código de pareamento">
           Volte aqui e clique em{" "}
           <button
             onClick={onGoToPair}
@@ -244,7 +254,7 @@ function HowToTab({ onGoToPair }: { onGoToPair: () => void }) {
           precisar do código no próximo passo.
         </Step>
 
-        <Step n={6} title="Ligue o agente">
+        <Step n={7} title="Ligue o agente">
           Na pasta do agente, dê um{" "}
           <strong className="text-white">duplo clique em run.bat</strong>. A janela
           vai pedir o código de pareamento — cole o código que você gerou no passo
@@ -252,7 +262,7 @@ function HowToTab({ onGoToPair }: { onGoToPair: () => void }) {
           começar a ouvir.
         </Step>
 
-        <Step n={7} title="Diga 'Olá Nexus'">
+        <Step n={8} title="Diga 'Olá Nexus'">
           Com o agente rodando, diga{" "}
           <strong className="text-white">"Olá Nexus"</strong> perto do microfone e
           faça seu pedido. Você pode pedir para criar uma tarefa, marcar um evento,
@@ -260,9 +270,79 @@ function HowToTab({ onGoToPair }: { onGoToPair: () => void }) {
         </Step>
       </div>
 
+      <div className="glass p-6 space-y-4">
+        <div>
+          <div className="text-base font-semibold text-white">
+            Deixe o Nexus sempre ligado (opcional)
+          </div>
+          <div className="text-sm text-white/60 mt-1">
+            Por padrão, o Nexus só roda enquanto a janela do{" "}
+            <strong className="text-white/80">run.bat</strong> está aberta. Se você
+            fechar a janela, ele para. Para deixar o agente sempre ligado, mesmo
+            depois de reiniciar o computador, ative o início automático.
+          </div>
+        </div>
+
+        <div className="space-y-3 text-sm text-white/70">
+          <div>
+            <strong className="text-white">▸ Ativar início automático</strong>
+            <div className="mt-1 text-white/60">
+              Na pasta do agente, dê duplo clique em{" "}
+              <code className="text-nexus-accent">enable_autostart.bat</code>. O
+              Nexus passa a iniciar sozinho junto com o Windows, sem janela visível.
+            </div>
+          </div>
+
+          <div>
+            <strong className="text-white">▸ Parar o agente agora</strong>
+            <div className="mt-1 text-white/60">
+              Duplo clique em <code className="text-nexus-accent">stop.bat</code>.
+              Encerra o processo do Nexus imediatamente, mas não desativa o início
+              automático (ele volta no próximo boot, se ativado).
+            </div>
+          </div>
+
+          <div>
+            <strong className="text-white">▸ Desativar início automático</strong>
+            <div className="mt-1 text-white/60">
+              Duplo clique em{" "}
+              <code className="text-nexus-accent">disable_autostart.bat</code>. O
+              Nexus para de iniciar sozinho. Ele só vai rodar quando você abrir o{" "}
+              <code className="text-nexus-accent">run.bat</code> manualmente.
+            </div>
+          </div>
+
+          <div>
+            <strong className="text-white">▸ Verificar se está rodando</strong>
+            <div className="mt-1 text-white/60">
+              Aperte <kbd className="px-1.5 py-0.5 text-xs bg-white/10 rounded border border-white/20">Ctrl</kbd>
+              {" + "}
+              <kbd className="px-1.5 py-0.5 text-xs bg-white/10 rounded border border-white/20">Shift</kbd>
+              {" + "}
+              <kbd className="px-1.5 py-0.5 text-xs bg-white/10 rounded border border-white/20">Esc</kbd> para
+              abrir o Gerenciador de Tarefas. Na aba "Processos", procure{" "}
+              <strong className="text-white/80">pythonw.exe</strong> (ou{" "}
+              <strong className="text-white/80">python.exe</strong> se você usou o
+              run.bat). Se aparecer, o Nexus está ouvindo.
+            </div>
+          </div>
+        </div>
+
+        <div className="text-xs text-white/40 pt-3 border-t border-white/10">
+          O Nexus é totalmente local e open-source. Ele só usa internet para falar
+          com sua conta Nexus. Você pode parar, desativar ou desinstalar a qualquer
+          momento — nada continua rodando escondido.
+        </div>
+      </div>
+
       <div className="glass p-4 space-y-2">
         <div className="text-sm font-semibold text-white">Problemas comuns</div>
         <div className="space-y-2 text-sm text-white/60">
+          <div>
+            <strong className="text-white/80">Windows bloqueou o setup.bat ou run.bat</strong> —
+            Apague a pasta extraída. Clique com o botão direito no ZIP original →
+            Propriedades → marque "Desbloquear" → OK. Depois extraia de novo.
+          </div>
           <div>
             <strong className="text-white/80">Python não encontrado</strong> —
             Reinstale o Python marcando "Add Python to PATH".
