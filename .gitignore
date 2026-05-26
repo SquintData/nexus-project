@@ -42,6 +42,8 @@ supabase/seed.sql
 
 # Vosk models — baixar separadamente via setup script
 agent/models/
+# Silero VAD ONNX — baixar via setup_models.py
+agent/voice/silero_vad.onnx
 
 # Claude Code internal files
 .claude/
