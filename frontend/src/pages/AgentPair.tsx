@@ -210,7 +210,8 @@ function HowToTab({ onGoToPair }: { onGoToPair: () => void }) {
           na sua pasta de Downloads.
           <div className="mt-2">
             <a
-              href="https://github.com/SquintData/nexus-agent/archive/refs/heads/master.zip"
+              href="https://thjrromvhldqzkzyxwvb.supabase.co/storage/v1/object/public/downloads/nexus-agent.zip"
+              download
               className="btn btn-secondary inline-block text-sm"
             >
               Baixar Nexus Agent
