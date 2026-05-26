@@ -56,4 +56,4 @@ def run_pairing_flow(supabase_url: str, anon_key: str) -> None:
     update_env_var("AGENT_USER_EMAIL", email)
     update_env_var("AGENT_REFRESH_TOKEN", refresh_token)
 
-    print(f"\n✓ Pareado como {email}. Credenciais salvas em .env.\n")
+    print(f"\n[OK] Pareado como {email}. Credenciais salvas em .env.\n")

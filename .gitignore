@@ -31,6 +31,9 @@ Thumbs.db
 *.spec
 agent/build/
 agent/dist/
+# Agent ZIP regeneration workflow
+.agent-bundle/
+nexus-agent.zip
 
 # Supabase CLI (migrations/ stays versioned, temp/branches don't)
 supabase/.temp/

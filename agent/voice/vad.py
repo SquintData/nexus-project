@@ -10,7 +10,7 @@ class SileroVAD:
         self,
         sample_rate: int = 16000,
         threshold: float = 0.5,
-        min_silence_ms: int = 1500,
+        min_silence_ms: int = 600,
     ):
         self.sample_rate = sample_rate
         model, utils = torch.hub.load(

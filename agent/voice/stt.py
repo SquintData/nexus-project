@@ -21,6 +21,12 @@ class GroqSTT:
 
     def transcribe(self, audio: np.ndarray, sample_rate: int = 16000, language: str = "pt") -> str:
         """Transcribe int16 mono PCM audio array to text."""
+        if len(audio) / sample_rate < 0.3:
+            return ""
+        rms = np.sqrt(np.mean(audio.astype(np.float32) ** 2)) / 32768
+        if rms < 0.01:
+            return ""
+
         buf = io.BytesIO()
         with wave.open(buf, "wb") as w:
             w.setnchannels(1)
