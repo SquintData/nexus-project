@@ -49,22 +49,26 @@ export default function Dashboard() {
   const visibleCards = CARDS.filter((c) => selected.includes(c.id));
 
   return (
-    <div className="space-y-8">
-      <header className="flex items-start justify-between">
+    <div className="space-y-10 max-w-6xl mx-auto">
+      <header className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-white/60 text-sm">Diga "Olá, Nexus" para começar.</p>
+          <h1 className="text-4xl md:text-5xl font-light tracking-tightest text-white">
+            Dashboard
+          </h1>
+          <p className="text-white/45 text-sm mt-2 font-light">
+            Diga <span className="text-white/70">"Olá, Nexus"</span> para começar.
+          </p>
         </div>
         <button
           onClick={() => setConfigOpen(true)}
-          className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white"
+          className="p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/15 text-white/60 hover:text-white transition"
           title="Configurar cards"
         >
-          <Settings size={18} />
+          <Settings size={17} strokeWidth={1.5} />
         </button>
       </header>
 
-      <div className="grid place-items-center py-8">
+      <div className="grid place-items-center py-6">
         <Sphere state={state} />
       </div>
 
@@ -77,8 +81,14 @@ export default function Dashboard() {
         </div>
       )}
       {loaded && visibleCards.length === 0 && (
-        <div className="text-center text-white/40 text-sm py-8">
-          Nenhum card selecionado. <button onClick={() => setConfigOpen(true)} className="underline hover:text-white">Configurar</button>
+        <div className="text-center text-white/35 text-sm py-12 font-light">
+          Nenhum card selecionado.{" "}
+          <button
+            onClick={() => setConfigOpen(true)}
+            className="underline underline-offset-4 hover:text-white"
+          >
+            Configurar
+          </button>
         </div>
       )}
 
@@ -146,12 +156,20 @@ function StatCard({
   tone?: "default" | "positive" | "negative";
 }) {
   const valueColor =
-    tone === "positive" ? "text-green-400" : tone === "negative" ? "text-red-400" : "";
+    tone === "positive"
+      ? "text-emerald-300/90"
+      : tone === "negative"
+      ? "text-red-300/90"
+      : "text-white";
   return (
-    <div className="glass p-4">
-      <div className="text-xs uppercase tracking-wider text-white/50">{label}</div>
-      <div className={`text-3xl font-bold mt-1 ${valueColor}`}>{value}</div>
-      {hint && <div className="text-xs text-white/40 mt-1">{hint}</div>}
+    <div className="tile p-5">
+      <div className="text-[10px] uppercase tracking-[0.2em] text-white/45 font-medium">
+        {label}
+      </div>
+      <div className={`text-3xl md:text-4xl font-light tracking-tightest mt-3 ${valueColor}`}>
+        {value}
+      </div>
+      {hint && <div className="text-xs text-white/35 mt-2 font-light">{hint}</div>}
     </div>
   );
 }
@@ -226,10 +244,12 @@ function NextEventCard() {
     })();
   }, []);
   return (
-    <div className="glass p-4">
-      <div className="text-xs uppercase tracking-wider text-white/50">Próximo compromisso</div>
-      <div className="text-lg font-semibold mt-1 truncate">{title}</div>
-      {hint && <div className="text-xs text-white/40 mt-1">{hint}</div>}
+    <div className="tile p-5">
+      <div className="text-[10px] uppercase tracking-[0.2em] text-white/45 font-medium">
+        Próximo compromisso
+      </div>
+      <div className="text-lg font-light mt-3 truncate text-white">{title}</div>
+      {hint && <div className="text-xs text-white/35 mt-2 font-light">{hint}</div>}
     </div>
   );
 }

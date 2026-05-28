@@ -1,9 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
-    <radialGradient id="g" cx="35%" cy="35%" r="65%">
-      <stop offset="0%" stop-color="#a5e9ff"/>
-      <stop offset="100%" stop-color="#0c4a6e"/>
-    </radialGradient>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="50%" stop-color="#a8a8ac"/>
+      <stop offset="100%" stop-color="#4a4a4e"/>
+    </linearGradient>
   </defs>
-  <circle cx="32" cy="32" r="28" fill="url(#g)" stroke="#4cc9ff" stroke-width="2"/>
+  <rect width="64" height="64" rx="14" fill="#0a0a0c"/>
+  <g transform="translate(4 4) scale(0.875)">
+    <path d="M 14 22
+             A 7 7 0 0 1 21 15
+             L 21 49
+             A 7 7 0 0 1 14 56 Z"
+          fill="url(#g)"/>
+    <path d="M 43 8
+             A 7 7 0 0 1 50 15
+             L 50 42
+             A 7 7 0 0 1 43 49 Z"
+          fill="url(#g)"/>
+    <path d="M 21 20
+             L 30 20
+             L 50 44
+             L 50 49
+             L 43 49
+             L 21 26 Z"
+          fill="url(#g)"/>
+  </g>
 </svg>

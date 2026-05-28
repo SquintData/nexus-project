@@ -6,11 +6,18 @@ export default {
     extend: {
       colors: {
         nexus: {
-          bg: "#05070d",
-          panel: "rgba(255,255,255,0.04)",
-          border: "rgba(255,255,255,0.08)",
-          accent: "#4cc9ff",
-          accent2: "#a855f7",
+          bg: "#000000",
+          surface: "#0a0a0c",
+          panel: "rgba(255,255,255,0.025)",
+          panel2: "rgba(255,255,255,0.04)",
+          border: "rgba(255,255,255,0.07)",
+          borderStrong: "rgba(255,255,255,0.14)",
+          text: "#f5f5f7",
+          muted: "rgba(245,245,247,0.55)",
+          subtle: "rgba(245,245,247,0.35)",
+          accent: "#f5f5f7",
+          accent2: "#a8a8ac",
+          chrome: "#d8d8da",
           error: "#ef4444",
         },
       },
@@ -24,6 +31,13 @@ export default {
         "spin-slow": "spin 8s linear infinite",
       },
       backdropBlur: { xs: "2px" },
+      letterSpacing: {
+        tightest: "-0.04em",
+      },
+      boxShadow: {
+        "glass": "0 1px 0 0 rgba(255,255,255,0.04) inset, 0 0 0 1px rgba(255,255,255,0.06)",
+        "glow-soft": "0 0 40px rgba(255,255,255,0.04)",
+      },
     },
   },
   plugins: [],

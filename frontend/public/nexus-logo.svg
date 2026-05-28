@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <defs>
+    <linearGradient id="chrome" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="35%" stop-color="#d8d8da"/>
+      <stop offset="55%" stop-color="#8a8a8d"/>
+      <stop offset="75%" stop-color="#c8c8cc"/>
+      <stop offset="100%" stop-color="#5a5a5e"/>
+    </linearGradient>
+    <linearGradient id="chromeEdge" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#3a3a3e" stop-opacity="0.4"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Stylized N: two rounded vertical bars connected by a diagonal stroke -->
+  <g>
+    <!-- Left vertical bar (stadium shape) -->
+    <path d="M 40 60
+             A 22 22 0 0 1 62 38
+             L 62 138
+             A 22 22 0 0 1 40 160
+             Z"
+          fill="url(#chrome)"
+          stroke="url(#chromeEdge)"
+          stroke-width="1.2"/>
+
+    <!-- Right vertical bar (stadium shape) -->
+    <path d="M 138 62
+             A 22 22 0 0 1 160 84
+             L 160 140
+             A 22 22 0 0 1 138 162
+             L 138 62 Z"
+          fill="url(#chrome)"
+          stroke="url(#chromeEdge)"
+          stroke-width="1.2"/>
+
+    <!-- Diagonal connector blade -->
+    <path d="M 62 58
+             L 92 58
+             L 160 140
+             L 160 162
+             L 138 162
+             L 62 78 Z"
+          fill="url(#chrome)"
+          stroke="url(#chromeEdge)"
+          stroke-width="1.2"/>
+
+    <!-- Subtle highlight overlay -->
+    <path d="M 50 50
+             L 60 45
+             L 62 138
+             L 52 145 Z"
+          fill="#ffffff"
+          opacity="0.18"/>
+  </g>
+</svg>
