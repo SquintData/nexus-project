@@ -10,7 +10,7 @@ import zipfile
 from pathlib import Path
 
 VOSK_URL = "https://alphacephei.com/vosk/models/vosk-model-small-pt-0.3.zip"
-SILERO_URL = "https://github.com/snakers4/silero-vad/raw/master/src/silero_vad/data/silero_vad.onnx"
+SILERO_URL = "https://github.com/snakers4/silero-vad/raw/master/src/silero_vad/data/silero_vad_half.onnx"
 
 ROOT = Path(__file__).resolve().parent
 MODELS_DIR = ROOT / "models"

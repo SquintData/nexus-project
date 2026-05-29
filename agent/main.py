@@ -59,6 +59,51 @@ def _load_config_json() -> dict:
         return json.load(f)
 
 
+class _TTSPipeline:
+    """Overlaps TTS HTTP fetch with audio playback across a sentence stream.
+
+    push(text) queues a sentence; a fetcher thread downloads audio while the
+    player thread plays the previous sentence. flush() waits for all playback.
+    """
+
+    def __init__(self, tts: "OpenAITTS") -> None:
+        self._tts = tts
+        self._text_q: queue.Queue = queue.Queue()
+        self._audio_q: queue.Queue = queue.Queue()
+        self._fetcher = threading.Thread(target=self._fetch_loop, daemon=True)
+        self._player = threading.Thread(target=self._play_loop, daemon=True)
+        self._fetcher.start()
+        self._player.start()
+
+    def push(self, text: str) -> None:
+        self._text_q.put(text)
+
+    def flush(self) -> None:
+        self._text_q.put(None)  # sentinel: no more sentences
+        self._player.join()
+
+    def _fetch_loop(self) -> None:
+        while True:
+            text = self._text_q.get()
+            if text is None:
+                self._audio_q.put(None)
+                return
+            try:
+                self._audio_q.put(self._tts.fetch(text))
+            except Exception:
+                self._audio_q.put(b"")  # skip on error, keep pipeline alive
+
+    def _play_loop(self) -> None:
+        while True:
+            audio = self._audio_q.get()
+            if audio is None:
+                return
+            try:
+                self._tts.play(audio)
+            except Exception:
+                pass
+
+
 class NexusAgent:
     def __init__(self):
         self.cfg = load()
@@ -72,7 +117,7 @@ class NexusAgent:
         self.llm = LLMOrchestrator(self.cfg.llm_proxy_url, get_token, self.cfg.llm_model)
         self.wake = WakeWordDetector(self.cfg.vosk_model_path, self.cfg.wake_word)
         console.print("[dim]Loading Silero VAD ...[/]")
-        self.vad = SileroVAD(sample_rate=SAMPLE_RATE)
+        self.vad = SileroVAD(sample_rate=SAMPLE_RATE, threshold=self.cfg.vad_threshold)
         self.tools: ToolHandlers | None = None
         self.audio_q: queue.Queue = queue.Queue()
         self._mic_muted = False  # True while TTS is playing → discard mic chunks
@@ -188,13 +233,31 @@ class NexusAgent:
                 set_sphere("processing")
                 memory = self.db.list_memory()
                 routine_names = self.db.list_routine_names()
-                reply, executed = self.llm.process(
-                    user_text=text,
-                    memory=memory,
-                    routines=routine_names,
-                    apps=list(self.allowed_apps.keys()),
-                    tool_executor=self.tools,  # type: ignore[arg-type]
-                )
+                if self.cfg.stream_tts:
+                    self._mic_muted = True
+                    try:
+                        pipeline = _TTSPipeline(self.tts)
+                        reply, executed = self.llm.process_streaming(
+                            user_text=text,
+                            memory=memory,
+                            routines=routine_names,
+                            apps=list(self.allowed_apps.keys()),
+                            tool_executor=self.tools,  # type: ignore[arg-type]
+                            on_sentence=pipeline.push,
+                        )
+                        pipeline.flush()
+                    finally:
+                        self._drain_queue()
+                        self._mic_muted = False
+                else:
+                    reply, executed = self.llm.process(
+                        user_text=text,
+                        memory=memory,
+                        routines=routine_names,
+                        apps=list(self.allowed_apps.keys()),
+                        tool_executor=self.tools,  # type: ignore[arg-type]
+                    )
+                    self._speak(reply)
                 for act in executed:
                     log.info(f"[magenta]tool[/] {act['name']}({act['args']}) → {act['result']}")
                 log.info(f"[bold green]Nexus:[/] {reply}")
@@ -203,7 +266,6 @@ class NexusAgent:
                     self.db.save_chat_message("assistant", reply, "voice")
                 except Exception:
                     pass
-                self._speak(reply)
                 set_sphere("listening")
             except Exception as e:
                 log.exception("Pipeline error")

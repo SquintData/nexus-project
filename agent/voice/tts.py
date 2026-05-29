@@ -19,7 +19,7 @@ class OpenAITTS:
         self,
         proxy_url: str,
         get_token: Callable[[], str],
-        model: str = "gpt-4o-mini-tts",
+        model: str = "tts-1",
         voice: str = "nova",
     ):
         self.proxy_url = proxy_url
@@ -27,9 +27,10 @@ class OpenAITTS:
         self.model = model
         self.voice = voice
 
-    def speak(self, text: str) -> None:
+    def fetch(self, text: str) -> bytes:
+        """HTTP-only: returns raw MP3 bytes without playing."""
         if not text or not text.strip():
-            return
+            return b""
         resp = httpx.post(
             self.proxy_url,
             headers={
@@ -46,8 +47,12 @@ class OpenAITTS:
         )
         if resp.status_code != 200:
             raise RuntimeError(f"TTS proxy error {resp.status_code}: {resp.text}")
-        audio_bytes = resp.content
+        return resp.content
 
+    def play(self, audio_bytes: bytes) -> None:
+        """Play raw MP3 bytes without fetching."""
+        if not audio_bytes:
+            return
         tmpdir = Path(tempfile.gettempdir())
         path = tmpdir / f"nexus_tts_{int(time.time()*1000)}.mp3"
         try:
@@ -56,7 +61,6 @@ class OpenAITTS:
                 from playsound import playsound
                 playsound(str(path))
             except Exception:
-                # Fallback: sounddevice + soundfile
                 import sounddevice as sd
                 import soundfile as sf
                 data, sr = sf.read(io.BytesIO(audio_bytes), dtype="float32")
@@ -67,3 +71,9 @@ class OpenAITTS:
                 path.unlink(missing_ok=True)
             except Exception:
                 pass
+
+    def speak(self, text: str) -> None:
+        """Convenience: fetch + play in sequence."""
+        audio = self.fetch(text)
+        if audio:
+            self.play(audio)

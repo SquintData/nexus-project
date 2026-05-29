@@ -41,7 +41,6 @@ class SileroVAD:
             sess_options=opts,
             providers=["CPUExecutionProvider"],
         )
-        self._sr = np.array(sample_rate, dtype=np.int64)
         self.reset()
 
     def reset(self) -> None:
@@ -49,6 +48,7 @@ class SileroVAD:
         self._triggered = False
         self._silence_count = 0
         self._sample_pos = 0
+        self.last_prob: float = 0.0
 
     def step(self, chunk_int16: np.ndarray) -> dict | None:
         """Feed one chunk; returns {'start': t} or {'end': t} or None."""
@@ -57,10 +57,11 @@ class SileroVAD:
 
         prob, new_state = self.session.run(
             None,
-            {"input": audio, "state": self._state, "sr": self._sr},
+            {"input": audio, "state": self._state},
         )
         self._state = new_state
         p = float(prob[0, 0])
+        self.last_prob = p
 
         n = audio.shape[1]
         self._sample_pos += n

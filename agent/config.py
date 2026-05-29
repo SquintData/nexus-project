@@ -48,6 +48,8 @@ class Config:
     tts_model: str
     tts_voice: str
     vosk_model_path: str
+    stream_tts: bool
+    vad_threshold: float
 
     @property
     def llm_proxy_url(self) -> str:
@@ -76,10 +78,12 @@ def load() -> Config:
         agent_user_password=os.getenv("AGENT_USER_PASSWORD") or None,
         agent_refresh_token=os.getenv("AGENT_REFRESH_TOKEN") or None,
         stt_model=os.getenv("STT_MODEL", "whisper-large-v3-turbo"),
-        llm_model=os.getenv("LLM_MODEL", "gpt-4o-mini"),
-        tts_model=os.getenv("TTS_MODEL", "gpt-4o-mini-tts"),
+        llm_model=os.getenv("LLM_MODEL", "gpt-4.1-mini"),
+        tts_model=os.getenv("TTS_MODEL", "tts-1"),
         tts_voice=os.getenv("TTS_VOICE", "nova"),
         vosk_model_path=os.getenv("VOSK_MODEL_PATH", str(ROOT / "agent" / "models" / "vosk-pt")),
+        stream_tts=os.getenv("STREAM_TTS", "false").lower() == "true",
+        vad_threshold=float(os.getenv("VAD_THRESHOLD", "0.3")),
     )
 
 
