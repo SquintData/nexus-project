@@ -371,7 +371,8 @@ export default function AgentPair() {
   return (
     <div className="space-y-6 max-w-xl">
       <header>
-        <h1 className="text-2xl font-bold">Agente local</h1>
+        <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-white">Agente local</h1>
+        <p className="text-white/55 text-sm mt-2">Conecte o agente desktop à sua conta</p>
       </header>
 
       <div className="flex gap-1 p-1 rounded-lg bg-white/5 border border-white/10">

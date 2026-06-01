@@ -117,10 +117,10 @@ export default function Habits() {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center justify-between">
+      <header className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Hábitos</h1>
-          <p className="text-white/60 text-sm">{habits.length} hábito(s)</p>
+          <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-white">Hábitos</h1>
+          <p className="text-white/55 text-sm mt-2">{habits.length} hábito(s)</p>
         </div>
         <button className="btn btn-primary" onClick={() => setAddOpen(true)}>
           <Plus size={16} className="mr-1" /> Novo

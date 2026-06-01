@@ -17,7 +17,7 @@ export default function Login() {
   const turnstileRef = useRef<TurnstileInstance | null>(null);
 
   if (loading) return null;
-  if (user) return <Navigate to="/" replace />;
+  if (user) return <Navigate to="/app" replace />;
 
   const captchaRequired = !!TURNSTILE_SITEKEY;
   const submitDisabled = busy || (captchaRequired && !captchaToken);
@@ -94,8 +94,9 @@ export default function Login() {
   return (
     <div className="grid min-h-screen place-items-center p-4">
       <form onSubmit={submit} className="glass w-full max-w-sm p-6 space-y-4">
-        <div className="text-2xl font-bold">
-          <span className="text-nexus-accent">Ne</span>xus
+        <div className="flex items-center gap-3">
+          <img src="/nexus-logo.png" alt="" className="w-9 h-9 object-contain" />
+          <span className="text-2xl font-semibold tracking-tight">NEXUS</span>
         </div>
         <p className="text-sm text-white/60">
           {mode === "signin" ? "Entre na sua conta" : "Crie sua conta"}

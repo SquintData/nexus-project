@@ -298,10 +298,10 @@ export default function Chat() {
             </button>
           )}
           <div>
-            <h1 className="text-3xl font-bold">
+            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-white">
               {tab === "history" && openedSession ? openedSession.title : "Chat"}
             </h1>
-            <p className="text-white/60 text-sm">
+            <p className="text-white/55 text-sm mt-2">
               {tab === "new" && (currentSession ? `${currentMessages.length} mensagem(s)` : "Nova conversa")}
               {tab === "history" && !openedSession && `${sessions.length} conversa(s)`}
               {tab === "history" && openedSession && `${openedMessages.length} mensagem(s)`}

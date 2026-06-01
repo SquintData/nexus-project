@@ -33,9 +33,9 @@ export function Shell() {
             >
               <Menu size={20} strokeWidth={1.4} />
             </button>
-            <div className="flex items-center gap-2">
-              <img src="/nexus-logo.svg" alt="" className="w-6 h-6" />
-              <span className="text-base font-light tracking-tightest">NEXUS</span>
+            <div className="flex items-center gap-2.5">
+              <img src="/nexus-logo.png" alt="" className="w-7 h-7 object-contain" />
+              <span className="text-base font-semibold tracking-tight">NEXUS</span>
             </div>
           </div>
           <main className="flex-1 overflow-auto p-4 md:p-8">

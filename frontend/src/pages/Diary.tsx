@@ -136,10 +136,10 @@ export default function Diary() {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center justify-between">
+      <header className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Diário</h1>
-          <p className="text-white/60 text-sm">{entries.length} entrada(s)</p>
+          <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-white">Diário</h1>
+          <p className="text-white/55 text-sm mt-2">{entries.length} entrada(s)</p>
         </div>
         <button className="btn btn-primary" onClick={openAdd}>
           <Plus size={16} className="mr-1" /> Hoje

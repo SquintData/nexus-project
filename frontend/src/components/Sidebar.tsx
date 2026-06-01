@@ -17,30 +17,30 @@ import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/cn";
 
 const NAV = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/chat", label: "Chat", icon: MessageCircle },
-  { to: "/kanban", label: "Tarefas", icon: KanbanSquare },
-  { to: "/agenda", label: "Agenda", icon: Calendar },
-  { to: "/ideias", label: "Ideias", icon: Lightbulb },
-  { to: "/rotinas", label: "Rotinas", icon: Workflow },
-  { to: "/memoria", label: "Memória", icon: Brain },
-  { to: "/financas", label: "Finanças", icon: Wallet },
-  { to: "/habitos", label: "Hábitos", icon: Flame },
-  { to: "/diario", label: "Diário", icon: BookOpen },
-  { to: "/agente", label: "Parear agente", icon: Plug },
+  { to: "/app", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/app/chat", label: "Chat", icon: MessageCircle },
+  { to: "/app/kanban", label: "Tarefas", icon: KanbanSquare },
+  { to: "/app/agenda", label: "Agenda", icon: Calendar },
+  { to: "/app/ideias", label: "Ideias", icon: Lightbulb },
+  { to: "/app/rotinas", label: "Rotinas", icon: Workflow },
+  { to: "/app/memoria", label: "Memória", icon: Brain },
+  { to: "/app/financas", label: "Finanças", icon: Wallet },
+  { to: "/app/habitos", label: "Hábitos", icon: Flame },
+  { to: "/app/diario", label: "Diário", icon: BookOpen },
+  { to: "/app/agente", label: "Parear agente", icon: Plug },
 ];
 
 export function Sidebar({ onClose }: { onClose?: () => void }) {
   const { user, signOut } = useAuth();
   return (
     <aside className="w-64 glass-strong m-3 mr-0 p-5 flex flex-col h-[calc(100vh-24px)]">
-      <div className="px-1 mb-8 flex items-center gap-2.5">
+      <div className="px-1 mb-8 flex items-center gap-3">
         <img
-          src="/nexus-logo.svg"
+          src="/nexus-logo.png"
           alt="Nexus"
-          className="w-7 h-7 drop-shadow-[0_0_8px_rgba(255,255,255,0.15)]"
+          className="w-8 h-8 object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.15)]"
         />
-        <span className="text-[20px] font-light tracking-tightest text-white">
+        <span className="text-[19px] font-semibold tracking-tight text-white">
           NEXUS
         </span>
       </div>
@@ -50,18 +50,18 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
           <NavLink
             key={to}
             to={to}
-            end={to === "/"}
+            end={to === "/app"}
             onClick={onClose}
             className={({ isActive }) =>
               cn(
                 "nav-link",
                 isActive
-                  ? "bg-white/[0.06] text-white border border-white/10 shadow-glow-soft"
-                  : "text-white/55 hover:bg-white/[0.03] hover:text-white border border-transparent",
+                  ? "bg-white/[0.07] text-white border border-white/10 shadow-glow-soft"
+                  : "text-white/60 hover:bg-white/[0.04] hover:text-white border border-transparent",
               )
             }
           >
-            <Icon size={17} strokeWidth={1.4} />
+            <Icon size={17} strokeWidth={1.8} />
             {label}
           </NavLink>
         ))}

@@ -52,11 +52,11 @@ export default function Dashboard() {
     <div className="space-y-10 max-w-6xl mx-auto">
       <header className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-4xl md:text-5xl font-light tracking-tightest text-white">
+          <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-white">
             Dashboard
           </h1>
-          <p className="text-white/45 text-sm mt-2 font-light">
-            Diga <span className="text-white/70">"Olá, Nexus"</span> para começar.
+          <p className="text-white/55 text-sm mt-2 font-normal">
+            Diga <span className="text-white/80 font-medium">"Olá, Nexus"</span> para começar.
           </p>
         </div>
         <button
@@ -163,13 +163,15 @@ function StatCard({
       : "text-white";
   return (
     <div className="tile p-5">
-      <div className="text-[10px] uppercase tracking-[0.2em] text-white/45 font-medium">
+      <div className="text-[10px] uppercase tracking-[0.18em] text-white/50 font-semibold">
         {label}
       </div>
-      <div className={`text-3xl md:text-4xl font-light tracking-tightest mt-3 ${valueColor}`}>
+      <div
+        className={`text-3xl md:text-4xl font-semibold tracking-tight mt-3 whitespace-nowrap tabular-nums ${valueColor}`}
+      >
         {value}
       </div>
-      {hint && <div className="text-xs text-white/35 mt-2 font-light">{hint}</div>}
+      {hint && <div className="text-xs text-white/45 mt-2 font-normal">{hint}</div>}
     </div>
   );
 }
@@ -245,11 +247,11 @@ function NextEventCard() {
   }, []);
   return (
     <div className="tile p-5">
-      <div className="text-[10px] uppercase tracking-[0.2em] text-white/45 font-medium">
+      <div className="text-[10px] uppercase tracking-[0.18em] text-white/50 font-semibold">
         Próximo compromisso
       </div>
-      <div className="text-lg font-light mt-3 truncate text-white">{title}</div>
-      {hint && <div className="text-xs text-white/35 mt-2 font-light">{hint}</div>}
+      <div className="text-lg font-medium mt-3 truncate text-white">{title}</div>
+      {hint && <div className="text-xs text-white/45 mt-2 font-normal whitespace-nowrap">{hint}</div>}
     </div>
   );
 }

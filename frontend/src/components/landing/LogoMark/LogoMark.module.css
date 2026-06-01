@@ -1,0 +1,27 @@
+.container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.glow {
+  position: absolute;
+  inset: -25%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.08) 0%,
+    transparent 70%
+  );
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+.image {
+  position: relative;
+  z-index: 1;
+  border-radius: 10px;
+  object-fit: contain;
+}

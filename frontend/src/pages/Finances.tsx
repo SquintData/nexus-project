@@ -143,10 +143,10 @@ export default function Finances() {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center justify-between">
+      <header className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Finanças</h1>
-          <p className="text-white/60 text-sm">{transactions.length} transação(ões) no mês</p>
+          <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-white">Finanças</h1>
+          <p className="text-white/55 text-sm mt-2">{transactions.length} transação(ões) no mês</p>
         </div>
         <button className="btn btn-primary" onClick={openAdd}>
           <Plus size={16} className="mr-1" /> Nova
@@ -155,19 +155,19 @@ export default function Finances() {
 
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="glass p-4 space-y-1">
-          <p className="text-xs text-white/40 uppercase tracking-wider">Saldo total</p>
-          <p className={`text-2xl font-bold ${summary.balance >= 0 ? "text-green-400" : "text-red-400"}`}>
+        <div className="tile p-5 space-y-2">
+          <p className="text-[10px] text-white/50 uppercase tracking-[0.18em] font-semibold">Saldo total</p>
+          <p className={`text-2xl md:text-3xl font-semibold tracking-tight whitespace-nowrap tabular-nums ${summary.balance >= 0 ? "text-emerald-300/90" : "text-red-300/90"}`}>
             {fmt(summary.balance)}
           </p>
         </div>
-        <div className="glass p-4 space-y-1">
-          <p className="text-xs text-white/40 uppercase tracking-wider">Entradas (mês)</p>
-          <p className="text-2xl font-bold text-green-400">+{fmt(summary.monthIncome)}</p>
+        <div className="tile p-5 space-y-2">
+          <p className="text-[10px] text-white/50 uppercase tracking-[0.18em] font-semibold">Entradas (mês)</p>
+          <p className="text-2xl md:text-3xl font-semibold tracking-tight whitespace-nowrap tabular-nums text-emerald-300/90">+{fmt(summary.monthIncome)}</p>
         </div>
-        <div className="glass p-4 space-y-1">
-          <p className="text-xs text-white/40 uppercase tracking-wider">Saídas (mês)</p>
-          <p className="text-2xl font-bold text-red-400">-{fmt(summary.monthExpense)}</p>
+        <div className="tile p-5 space-y-2">
+          <p className="text-[10px] text-white/50 uppercase tracking-[0.18em] font-semibold">Saídas (mês)</p>
+          <p className="text-2xl md:text-3xl font-semibold tracking-tight whitespace-nowrap tabular-nums text-red-300/90">-{fmt(summary.monthExpense)}</p>
         </div>
       </div>
 
@@ -211,12 +211,12 @@ export default function Finances() {
           {transactions.map((t) => (
             <div key={t.id} className="glass p-4 flex items-center gap-4">
               {t.type === "income" ? (
-                <ArrowUpCircle size={20} className="text-green-400 shrink-0" />
+                <ArrowUpCircle size={20} className="text-emerald-300/90 shrink-0" />
               ) : (
-                <ArrowDownCircle size={20} className="text-red-400 shrink-0" />
+                <ArrowDownCircle size={20} className="text-red-300/90 shrink-0" />
               )}
               <div className="flex-1 min-w-0">
-                <p className={`font-semibold ${t.type === "income" ? "text-green-400" : "text-red-400"}`}>
+                <p className={`font-semibold whitespace-nowrap tabular-nums ${t.type === "income" ? "text-emerald-300/90" : "text-red-300/90"}`}>
                   {t.type === "income" ? "+" : "-"}{fmt(Number(t.amount))}
                 </p>
                 <p className="text-xs text-white/50 truncate">
@@ -252,7 +252,7 @@ export default function Finances() {
                     onChange={() => setFormType(t)}
                     className="accent-nexus-accent"
                   />
-                  <span className={t === "income" ? "text-green-400" : "text-red-400"}>
+                  <span className={t === "income" ? "text-emerald-300/90" : "text-red-300/90"}>
                     {t === "income" ? "Entrada" : "Saída"}
                   </span>
                 </label>
