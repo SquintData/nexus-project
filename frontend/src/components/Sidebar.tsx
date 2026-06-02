@@ -15,7 +15,7 @@ import {
   Lock,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { hasAccess } from "@/lib/planAccess";
+import { hasPlan } from "@/lib/planAccess";
 import { cn } from "@/lib/cn";
 
 const NAV = [
@@ -50,10 +50,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
       <nav className="flex-1 space-y-0.5 -mx-1">
         {NAV.map(({ to, label, icon: Icon, requiredPlan }) => {
           const locked =
-            !!requiredPlan &&
-            (!profile ||
-              !hasAccess(profile.plan_type, requiredPlan) ||
-              profile.subscription_status !== "active");
+            !!requiredPlan && (!profile || !hasPlan(profile, requiredPlan));
 
           if (locked) {
             return (

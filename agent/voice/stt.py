@@ -12,6 +12,8 @@ from typing import Callable
 import httpx
 import numpy as np
 
+from agent.errors import plan_forbidden_from_httpx
+
 
 class GroqSTT:
     def __init__(self, proxy_url: str, get_token: Callable[[], str], model: str = "whisper-large-v3-turbo"):
@@ -40,6 +42,8 @@ class GroqSTT:
         headers = {"Authorization": f"Bearer {self.get_token()}"}
 
         resp = httpx.post(self.proxy_url, headers=headers, data=data, files=files, timeout=60.0)
+        if resp.status_code == 403:
+            raise plan_forbidden_from_httpx(resp)
         if resp.status_code != 200:
             raise RuntimeError(f"STT proxy error {resp.status_code}: {resp.text}")
         return resp.text.strip()

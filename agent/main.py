@@ -25,6 +25,7 @@ from rich.logging import RichHandler
 
 from agent.config import has_auth, load
 from agent.db.client import NexusDB
+from agent.errors import PlanForbiddenError
 from agent.llm.orchestrator import LLMOrchestrator
 from agent.pairing import run_pairing_flow
 from agent.sphere import configure as configure_sphere, set_sphere
@@ -148,6 +149,16 @@ class NexusAgent:
             self._drain_queue()
             self._mic_muted = False
 
+    def _plan_blocked_notice(self, msg: str) -> None:
+        """Surface a proxy 403 to the user. Console always; TTS best-effort
+        (TTS itself is plan-blocked when a voice plan has expired)."""
+        console.print(f"[bold yellow]⚠ {msg}[/]")
+        log.warning(msg)
+        try:
+            self._speak(msg)
+        except Exception:
+            pass
+
     def start(self) -> None:
         console.rule("[bold cyan]Nexus Agent[/]")
         log.info("Logging in to Supabase ...")
@@ -219,6 +230,13 @@ class NexusAgent:
                 return
             try:
                 text = self.stt.transcribe(audio)
+            except PlanForbiddenError:
+                self._plan_blocked_notice(
+                    "Seu plano não inclui comandos de voz, ou expirou. "
+                    "Renove em usenexus.online para continuar."
+                )
+                set_sphere("idle")
+                return
             except Exception as e:
                 log.error(f"STT failed: {e}")
                 set_sphere("error")
@@ -267,6 +285,14 @@ class NexusAgent:
                 except Exception:
                     pass
                 set_sphere("listening")
+            except PlanForbiddenError:
+                self.llm.reset_session()
+                self._plan_blocked_notice(
+                    "Seu plano não inclui esse recurso de IA, ou expirou. "
+                    "Renove em usenexus.online para continuar."
+                )
+                set_sphere("idle")
+                return
             except Exception as e:
                 log.exception("Pipeline error")
                 self.llm.reset_session()  # corrupt history → clear before next turn
@@ -388,6 +414,14 @@ class NexusAgent:
             log.info(f"[bold green]Nexus (chat):[/] {reply}")
             self.db.save_chat_message("assistant", reply, "chat", session_id=session_id)
             self.db.touch_chat_session(session_id)
+        except PlanForbiddenError:
+            self.db.save_chat_message(
+                "assistant",
+                "Seu plano não inclui o chat com IA, ou expirou. "
+                "Faça upgrade em usenexus.online/upgrade para continuar.",
+                "chat",
+                session_id=session_id,
+            )
         except Exception:
             log.exception("Chat processing error")
             self.db.save_chat_message(

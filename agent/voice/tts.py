@@ -13,6 +13,8 @@ from typing import Callable
 
 import httpx
 
+from agent.errors import plan_forbidden_from_httpx
+
 
 class OpenAITTS:
     def __init__(
@@ -45,6 +47,8 @@ class OpenAITTS:
             },
             timeout=60.0,
         )
+        if resp.status_code == 403:
+            raise plan_forbidden_from_httpx(resp)
         if resp.status_code != 200:
             raise RuntimeError(f"TTS proxy error {resp.status_code}: {resp.text}")
         return resp.content

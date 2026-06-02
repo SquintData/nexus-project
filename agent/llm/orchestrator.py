@@ -11,8 +11,9 @@ import re
 from datetime import datetime
 from typing import Any, Callable
 
-from openai import OpenAI
+from openai import OpenAI, PermissionDeniedError
 
+from agent.errors import PlanForbiddenError
 from agent.llm.tools import SYSTEM_PROMPT, build_tools_schema
 
 _SENTENCE_END = re.compile(r'(?<=[.!?…])\s+')
@@ -143,13 +144,16 @@ class LLMOrchestrator:
         # Loop: each round may call tools; stops when LLM returns no tool_calls.
         # Supports sequential chains (get_tasks → update_task) and parallel tools.
         for _round in range(5):
-            response = client.chat.completions.create(
-                model=self.model,
-                messages=self._safe_history(),  # defensive sanitize before every call
-                tools=tools,
-                tool_choice="auto",
-                temperature=0.2,
-            )
+            try:
+                response = client.chat.completions.create(
+                    model=self.model,
+                    messages=self._safe_history(),  # defensive sanitize before every call
+                    tools=tools,
+                    tool_choice="auto",
+                    temperature=0.2,
+                )
+            except PermissionDeniedError as e:
+                raise PlanForbiddenError() from e
             msg = response.choices[0].message
 
             assistant_entry: dict[str, Any] = {"role": "assistant", "content": msg.content}
@@ -253,14 +257,17 @@ class LLMOrchestrator:
         client = self._client()
 
         for _round in range(5):
-            stream = client.chat.completions.create(
-                model=self.model,
-                messages=self._safe_history(),
-                tools=tools,
-                tool_choice="auto",
-                temperature=0.2,
-                stream=True,
-            )
+            try:
+                stream = client.chat.completions.create(
+                    model=self.model,
+                    messages=self._safe_history(),
+                    tools=tools,
+                    tool_choice="auto",
+                    temperature=0.2,
+                    stream=True,
+                )
+            except PermissionDeniedError as e:
+                raise PlanForbiddenError() from e
 
             content_buf = ""
             sentence_buf = ""

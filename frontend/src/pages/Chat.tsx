@@ -1,7 +1,11 @@
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { ArrowLeft, Mic, MessageCircle, Pencil, Send, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/lib/toast";
+import { useAuth } from "@/lib/auth";
+import { hasPlan } from "@/lib/planAccess";
+import { Modal } from "@/components/Modal";
 import type { ChatMessage, ChatSession } from "@/types";
 
 type Tab = "new" | "history" | "voice";
@@ -31,7 +35,9 @@ function deriveTitle(text: string): string {
 
 export default function Chat() {
   const { toast } = useToast();
+  const { profile } = useAuth();
   const [tab, setTab] = useState<Tab>("new");
+  const [showUpgrade, setShowUpgrade] = useState(false);
 
   // Novo chat
   const [currentSession, setCurrentSession] = useState<ChatSession | null>(null);
@@ -139,6 +145,12 @@ export default function Chat() {
     e.preventDefault();
     const content = text.trim();
     if (!content) return;
+    // Proactive client-side gate: predict the proxy's 403 (chat plan lapsed
+    // mid-session) and show the upgrade modal instead of a dead pending message.
+    if (!profile || !hasPlan(profile, "chat")) {
+      setShowUpgrade(true);
+      return;
+    }
     setSending(true);
     try {
       const { data: u } = await supabase.auth.getUser();
@@ -401,6 +413,26 @@ export default function Chat() {
           </button>
         </form>
       )}
+
+      <Modal
+        open={showUpgrade}
+        onClose={() => setShowUpgrade(false)}
+        title="Plano necessário"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-white/60">
+            Seu plano Chat expirou ou não está ativo. Renove para continuar
+            conversando com o Nexus.
+          </p>
+          <Link
+            to="/upgrade?plan=chat"
+            onClick={() => setShowUpgrade(false)}
+            className="btn btn-primary inline-block"
+          >
+            Ver planos
+          </Link>
+        </div>
+      </Modal>
     </div>
   );
 }
