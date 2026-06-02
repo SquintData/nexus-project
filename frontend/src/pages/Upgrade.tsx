@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { CreditCard } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { useBillingPortal } from "@/lib/useBillingPortal";
 
 type PlanKey = "chat" | "voice";
 type Billing = "monthly" | "yearly";
@@ -61,8 +63,11 @@ export default function Upgrade() {
   const [loading, setLoading] = useState<PlanKey | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { user, profile, session } = useAuth();
+  const { openPortal, loading: portalLoading, error: portalError } = useBillingPortal();
   const [searchParams] = useSearchParams();
   const highlightedPlan = searchParams.get("plan") as PlanKey | null;
+  const isSubscriber =
+    !!profile && profile.plan_type !== "free" && !!profile.stripe_customer_id;
 
   useEffect(() => {
     const handlePageShow = (e: PageTransitionEvent) => {
@@ -147,6 +152,29 @@ export default function Upgrade() {
           </p>
         </div>
 
+        {isSubscriber ? (
+          <div className="max-w-md mx-auto flex flex-col items-center text-center rounded-2xl border border-white/20 bg-white/[0.03] shadow-[0_0_60px_rgba(255,255,255,0.04)] p-10 gap-5">
+            <div className="w-12 h-12 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center">
+              <CreditCard size={22} strokeWidth={1.6} className="text-white" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-lg mb-1">Você já é assinante</h2>
+              <p className="text-white/50 text-sm">
+                Gerencie sua assinatura, atualize a forma de pagamento, troque de
+                plano ou cancele quando quiser.
+              </p>
+            </div>
+            {portalError && <p className="text-red-400 text-sm">{portalError}</p>}
+            <button
+              onClick={openPortal}
+              disabled={portalLoading}
+              className="w-full py-3 rounded-xl text-sm font-semibold bg-white text-black hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {portalLoading ? "Abrindo..." : "Gerenciar Assinatura"}
+            </button>
+          </div>
+        ) : (
+          <>
         <div className="flex justify-center mb-10">
           <div className="flex bg-white/[0.04] border border-white/[0.08] rounded-lg p-1 gap-1">
             <button
@@ -248,6 +276,8 @@ export default function Upgrade() {
             );
           })}
         </div>
+          </>
+        )}
       </main>
     </div>
   );

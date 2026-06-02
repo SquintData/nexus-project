@@ -13,9 +13,11 @@ import {
   Plug,
   LogOut,
   Lock,
+  CreditCard,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { hasPlan } from "@/lib/planAccess";
+import { useBillingPortal } from "@/lib/useBillingPortal";
 import { cn } from "@/lib/cn";
 
 const NAV = [
@@ -34,6 +36,8 @@ const NAV = [
 
 export function Sidebar({ onClose }: { onClose?: () => void }) {
   const { user, profile, signOut } = useAuth();
+  const { openPortal, loading: portalLoading, error: portalError } = useBillingPortal();
+  const isSubscriber = !!profile && profile.plan_type !== "free" && !!profile.stripe_customer_id;
   return (
     <aside className="w-64 glass-strong m-3 mr-0 p-5 flex flex-col h-[calc(100vh-24px)]">
       <div className="px-1 mb-8 flex items-center gap-3">
@@ -96,6 +100,19 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
           </div>
           <div className="text-xs text-white/55 truncate mt-1">{user?.email}</div>
         </div>
+        {isSubscriber && (
+          <button
+            onClick={openPortal}
+            disabled={portalLoading}
+            className="nav-link w-full text-white/50 hover:bg-white/[0.04] hover:text-white border border-transparent disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <CreditCard size={17} strokeWidth={1.4} />
+            {portalLoading ? "Abrindo..." : "Gerenciar Assinatura"}
+          </button>
+        )}
+        {portalError && (
+          <p className="px-2 mt-1 text-[11px] text-red-400">{portalError}</p>
+        )}
         <button
           onClick={signOut}
           className="nav-link w-full text-white/50 hover:bg-white/[0.04] hover:text-white border border-transparent"
