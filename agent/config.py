@@ -63,6 +63,10 @@ class Config:
     def tts_proxy_url(self) -> str:
         return f"{self.supabase_url.rstrip('/')}/functions/v1/tts-proxy"
 
+    @property
+    def memory_proxy_url(self) -> str:
+        return f"{self.supabase_url.rstrip('/')}/functions/v1/memory-proxy"
+
 
 def load() -> Config:
     # Reload .env each call so the pairing flow can write new credentials

@@ -27,6 +27,7 @@ from agent.config import has_auth, load
 from agent.db.client import NexusDB
 from agent.errors import AuthExpiredError, PlanForbiddenError
 from agent.llm.orchestrator import LLMOrchestrator
+from agent.memory import MemoryClient
 from agent.pairing import run_pairing_flow
 from agent.sphere import configure as configure_sphere, set_sphere
 from agent.tools.handlers import ToolHandlers
@@ -120,6 +121,7 @@ class NexusAgent:
         self.stt = GroqSTT(self.cfg.stt_proxy_url, get_token, self.cfg.stt_model)
         self.tts = OpenAITTS(self.cfg.tts_proxy_url, get_token, self.cfg.tts_model, self.cfg.tts_voice)
         self.llm = LLMOrchestrator(self.cfg.llm_proxy_url, get_token, self.cfg.llm_model)
+        self.memory = MemoryClient(self.cfg.memory_proxy_url, get_token)
         self.wake = WakeWordDetector(self.cfg.vosk_model_path, self.cfg.wake_word)
         console.print("[dim]Loading Silero VAD ...[/]")
         self.vad = SileroVAD(sample_rate=SAMPLE_RATE, threshold=self.cfg.vad_threshold)
@@ -184,6 +186,12 @@ class NexusAgent:
                 run_pairing_flow(self.cfg.supabase_url, self.cfg.supabase_anon_key)
         raise RuntimeError("unreachable")  # loop always returns or raises
 
+    def _memory_context(self, text: str) -> str | None:
+        """Best-effort long-term memory recall for the current utterance.
+        MemoryClient.search never raises (returns [] on any failure)."""
+        hits = self.memory.search(text)
+        return "\n".join(f"- {h}" for h in hits) if hits else None
+
     def start(self) -> None:
         console.rule("[bold cyan]Nexus Agent[/]")
         log.info("Logging in to Supabase ...")
@@ -195,7 +203,7 @@ class NexusAgent:
             self.db.get_access_token,
             uid,
         )
-        self.tools = ToolHandlers(self.db, self.allowed_apps)
+        self.tools = ToolHandlers(self.db, self.allowed_apps, self.memory)
 
         console.print(
             f"[bold blue]● Standby.[/] Diga '[cyan]{self.cfg.wake_word}[/]' para acordar "
@@ -276,6 +284,7 @@ class NexusAgent:
                 set_sphere("processing")
                 memory = self.db.list_memory()
                 routine_names = self.db.list_routine_names()
+                rag_ctx = self._memory_context(text)
                 if self.cfg.stream_tts:
                     self._mic_muted = True
                     try:
@@ -287,6 +296,7 @@ class NexusAgent:
                             apps=list(self.allowed_apps.keys()),
                             tool_executor=self.tools,  # type: ignore[arg-type]
                             on_sentence=pipeline.push,
+                            rag_context=rag_ctx,
                         )
                         pipeline.flush()
                     finally:
@@ -299,6 +309,7 @@ class NexusAgent:
                         routines=routine_names,
                         apps=list(self.allowed_apps.keys()),
                         tool_executor=self.tools,  # type: ignore[arg-type]
+                        rag_context=rag_ctx,
                     )
                     self._speak(reply)
                 for act in executed:
@@ -422,6 +433,7 @@ class NexusAgent:
         try:
             memory = self.db.list_memory()
             routine_names = self.db.list_routine_names()
+            rag_ctx = self._memory_context(msg["content"])
             history = self.db.get_session_history(session_id, exclude_msg_id=msg_id)
             self.chat_llm.reset_session()
             for h in history:
@@ -435,6 +447,7 @@ class NexusAgent:
                 routines=routine_names,
                 apps=list(self.allowed_apps.keys()),
                 tool_executor=self.tools,  # type: ignore[arg-type]
+                rag_context=rag_ctx,
             )
             log.info(f"[bold green]Nexus (chat):[/] {reply}")
             self.db.save_chat_message("assistant", reply, "chat", session_id=session_id)

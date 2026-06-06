@@ -10,8 +10,9 @@ from agent.desktop.automation import open_app, open_url, play_music, run_routine
 
 
 class ToolHandlers:
-    def __init__(self, db: NexusDB, allowed_apps: dict[str, str]):
+    def __init__(self, db: NexusDB, allowed_apps: dict[str, str], memory_client=None):
         self.db = db
+        self.memory = memory_client
         self.allowed_apps = {k.lower(): v for k, v in allowed_apps.items()}
         self.handlers: dict[str, Callable[[dict], str]] = {
             "open_app": self._open_app,
@@ -22,6 +23,7 @@ class ToolHandlers:
             "create_event": self._create_event,
             "create_idea": self._create_idea,
             "store_memory": self._store_memory,
+            "save_memory": self._save_memory,
             "get_tasks": self._get_tasks,
             "get_agenda": self._get_agenda,
             "get_ideas": self._get_ideas,
@@ -123,6 +125,15 @@ class ToolHandlers:
             return "Chave ou valor vazio"
         self.db.upsert_memory(key=key, value=value)
         return f"Memória salva: {key}={value}"
+
+    def _save_memory(self, args: dict) -> str:
+        content = (args.get("content") or "").strip()
+        if not content:
+            return "Conteúdo vazio"
+        if not self.memory:
+            return "Memória de longo prazo indisponível"
+        ok = self.memory.save(content)
+        return "Memória de longo prazo salva." if ok else "Não consegui salvar a memória agora."
 
     # ---------- consultas (read-only) ----------
     # Reads return a NUMBERED list with explicit order + hidden ids.

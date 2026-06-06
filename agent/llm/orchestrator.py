@@ -37,7 +37,7 @@ class LLMOrchestrator:
         self.session_history = []
         self._system_prompt = None
 
-    def _ensure_system(self, memory: list[dict], routines: list[str], apps: list[str]) -> None:
+    def _ensure_system(self, memory: list[dict], routines: list[str], apps: list[str], rag_context: str | None = None) -> None:
         memory_str = ", ".join(f"{m['key']}={m['value']}" for m in memory) or "vazia"
         now = datetime.now().strftime("%A, %d de %B de %Y - %H:%M (%Z)")
         prompt = SYSTEM_PROMPT.format(
@@ -46,6 +46,12 @@ class LLMOrchestrator:
             apps=", ".join(apps) or "(nenhum)",
             now=now,
         )
+        if rag_context:
+            prompt += (
+                "\n\n━━━ MEMÓRIAS RELEVANTES (recuperadas para esta pergunta) ━━━\n"
+                + rag_context
+                + "\n(Use como contexto se útil; não mencione que veio da memória.)"
+            )
         if self._system_prompt != prompt:
             self._system_prompt = prompt
             if self.session_history and self.session_history[0]["role"] == "system":
@@ -106,6 +112,7 @@ class LLMOrchestrator:
         routines: list[str],
         apps: list[str],
         tool_executor: Callable[[str, dict], str],
+        rag_context: str | None = None,
     ) -> tuple[str, list[dict]]:
         """Run a turn. Returns (final_speech_text, executed_actions).
 
@@ -113,7 +120,7 @@ class LLMOrchestrator:
         returns a short result message that goes back to the LLM for the
         natural follow-up reply.
         """
-        self._ensure_system(memory, routines, apps)
+        self._ensure_system(memory, routines, apps, rag_context)
         self.session_history.append({"role": "user", "content": user_text})
 
         # Trim history — always cut at a 'user' message boundary so tool/tool_call
@@ -229,6 +236,7 @@ class LLMOrchestrator:
         apps: list[str],
         tool_executor: Callable[[str, dict], str],
         on_sentence: Callable[[str], None],
+        rag_context: str | None = None,
     ) -> tuple[str, list[dict]]:
         """Like process(), but streams the final text round token-by-token.
 
@@ -237,7 +245,7 @@ class LLMOrchestrator:
         as soon as each sentence boundary arrives in the token stream — TTS for
         sentence N starts while the LLM is still generating sentence N+1.
         """
-        self._ensure_system(memory, routines, apps)
+        self._ensure_system(memory, routines, apps, rag_context)
         self.session_history.append({"role": "user", "content": user_text})
 
         MAX_TAIL = 20

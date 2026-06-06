@@ -488,6 +488,29 @@ def build_tools_schema(allowed_apps: list[str], routines: list[str]) -> list[dic
                 },
             },
         },
+        {
+            "type": "function",
+            "function": {
+                "name": "save_memory",
+                "description": (
+                    "Salva uma MEMÓRIA DE LONGO PRAZO em texto livre — contexto, episódios, "
+                    "preferências detalhadas, qualquer coisa que o usuário peça pra lembrar no "
+                    "futuro ('lembra que...', 'guarda isso', 'nunca esqueça que...'). DIFERENTE de "
+                    "store_memory, que é só fato curto chave-valor (nome, profissão)."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "content": {
+                            "type": "string",
+                            "description": "O texto da memória, completo e autoexplicativo.",
+                        },
+                    },
+                    "required": ["content"],
+                    "additionalProperties": False,
+                },
+            },
+        },
     ]
 
 
@@ -515,6 +538,8 @@ REGRAS:
 8. **ATUALIZAR EVENTO**: "reagenda X pra sexta às 13h" → update_event(title="X", new_start_at="2026-05-16T13:00:00-03:00") direto. Converta datas relativas para ISO 8601 fuso -03:00. Sem get_agenda antes.
 
 9. **ESQUECER/REMOVER MEMÓRIA**: "esquece X", "remove Y da memória" → delete_memory(key="chave"). JAMAIS use store_memory com valor vazio — isso não apaga nada. Se não souber a chave exata, chame get_memory antes para ver as chaves. "O que você sabe sobre mim?" → get_memory.
+
+9b. **MEMÓRIA LONGO PRAZO**: pedido explícito de lembrar algo livre ("lembra que...", "guarda isso") → save_memory(content="..."). Um bloco "MEMÓRIAS RELEVANTES" pode aparecer abaixo — use como contexto natural, sem dizer que veio da memória.
 
 10. **EXCLUIR** (delete_task/event/idea) — IRREVERSÍVEL. Fluxo 2 turnos:
     a. Obtenha o id via get_* se não tiver.
