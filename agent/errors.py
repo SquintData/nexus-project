@@ -18,6 +18,14 @@ class PlanForbiddenError(RuntimeError):
         self.code = code
 
 
+class AuthExpiredError(RuntimeError):
+    """Raised when the stored refresh_token is invalid/expired.
+
+    Signals the startup flow to run the terminal pairing flow and retry, so the
+    user never has to edit .env by hand to recover a dead session.
+    """
+
+
 def plan_forbidden_from_httpx(resp) -> PlanForbiddenError:
     """Build a PlanForbiddenError from an httpx 403 response.
 

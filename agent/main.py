@@ -25,7 +25,7 @@ from rich.logging import RichHandler
 
 from agent.config import has_auth, load
 from agent.db.client import NexusDB
-from agent.errors import PlanForbiddenError
+from agent.errors import AuthExpiredError, PlanForbiddenError
 from agent.llm.orchestrator import LLMOrchestrator
 from agent.pairing import run_pairing_flow
 from agent.sphere import configure as configure_sphere, set_sphere
@@ -50,6 +50,10 @@ for noisy in ("httpx", "openai", "urllib3", "torch"):
     logging.getLogger(noisy).setLevel(logging.WARNING)
 log = logging.getLogger("nexus")
 console = Console()
+
+# Bounded re-pairing attempts on startup auth failure, so a persistently bad
+# token can't spin forever.
+MAX_AUTH_ATTEMPTS = 3
 
 
 def _load_config_json() -> dict:
@@ -159,10 +163,31 @@ class NexusAgent:
         except Exception:
             pass
 
+    def _authenticate(self) -> str:
+        """Login with auto-recovery. On an expired/invalid refresh token, run the
+        terminal pairing flow and retry — the user never edits .env by hand.
+
+        login() reloads .env each call, so the freshly paired token is picked up
+        on the next attempt. Bounded by MAX_AUTH_ATTEMPTS.
+        """
+        for attempt in range(1, MAX_AUTH_ATTEMPTS + 1):
+            try:
+                return self.db.login()
+            except AuthExpiredError as e:
+                log.warning(str(e))
+                if attempt == MAX_AUTH_ATTEMPTS:
+                    raise
+                console.print(
+                    "[bold yellow]Sessão do agente expirou.[/] "
+                    "Gere um novo código em 'Parear agente' e cole abaixo."
+                )
+                run_pairing_flow(self.cfg.supabase_url, self.cfg.supabase_anon_key)
+        raise RuntimeError("unreachable")  # loop always returns or raises
+
     def start(self) -> None:
         console.rule("[bold cyan]Nexus Agent[/]")
         log.info("Logging in to Supabase ...")
-        uid = self.db.login()
+        uid = self._authenticate()
         log.info(f"Logged in as user {uid[:8]}…")
         configure_sphere(
             self.cfg.supabase_url,

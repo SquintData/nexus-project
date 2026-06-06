@@ -6,7 +6,8 @@ from datetime import datetime, timedelta, timezone
 
 from supabase import Client, create_client
 
-from agent.config import Config, update_env_var
+from agent.config import Config, load, update_env_var
+from agent.errors import AuthExpiredError
 
 log = logging.getLogger("nexus")
 
@@ -36,16 +37,17 @@ class NexusDB:
     def login(self) -> str:
         """Sign in using whichever credential we have. Returns user_id.
 
-        Prefers refresh_token; falls back to email/password (legacy).
+        Prefers refresh_token; falls back to email/password (legacy). Reloads
+        .env first so a just-completed pairing flow is picked up on retry.
+        Raises AuthExpiredError when no usable credential or the token is dead,
+        so the caller can re-pair instead of crashing.
         """
+        self.cfg = load()  # re-read .env: pairing may have just rewritten the token
         if self.cfg.agent_refresh_token:
             return self._login_refresh_token(self.cfg.agent_refresh_token)
         if self.cfg.agent_user_email and self.cfg.agent_user_password:
             return self._login_password(self.cfg.agent_user_email, self.cfg.agent_user_password)
-        raise RuntimeError(
-            "No auth credentials: set AGENT_REFRESH_TOKEN (via pairing) or "
-            "AGENT_USER_EMAIL/AGENT_USER_PASSWORD in .env"
-        )
+        raise AuthExpiredError("Sem credenciais de auth — pareamento necessário")
 
     def _login_password(self, email: str, password: str) -> str:
         resp = self.client.auth.sign_in_with_password({"email": email, "password": password})
@@ -55,9 +57,16 @@ class NexusDB:
         return self._user_id
 
     def _login_refresh_token(self, refresh_token: str) -> str:
-        resp = self.client.auth.refresh_session(refresh_token)
+        # supabase-py raises AuthApiError on a dead token (it does not return an
+        # empty response), so catch broadly and normalize to AuthExpiredError.
+        try:
+            resp = self.client.auth.refresh_session(refresh_token)
+        except Exception as e:
+            raise AuthExpiredError(f"Refresh token inválido ou expirado: {e}") from e
         if not resp.user or not resp.session:
-            raise RuntimeError("Refresh token invalid or expired — re-pair the agent")
+            raise AuthExpiredError(
+                "Refresh token inválido ou expirado — re-pareamento necessário"
+            )
         self._user_id = resp.user.id
         # The callback persists the rotated token automatically.
         return self._user_id
