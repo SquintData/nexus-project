@@ -45,32 +45,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data }) => {
-      setSession(data.session);
-      if (data.session?.user) {
-        try {
-          setProfile(await fetchProfile(data.session.user.id));
-        } catch {
-          setProfile(null);
-        }
-      }
-      setLoading(false);
-    });
+    let active = true;
 
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_e, s) => {
+    // Resolve session + profile in one place. fetchProfile (supabase.from) is
+    // NEVER awaited inside the onAuthStateChange callback: doing so re-enters
+    // the supabase-js auth lock the callback already holds and deadlocks, which
+    // also freezes getSession() and pins `loading` at true forever (the
+    // infinite "Carregando…" on the route guards). The `finally` guarantees
+    // loading always clears once the promise settles.
+    async function resolve(s: Session | null) {
+      if (!active) return;
       setSession(s);
-      if (s?.user) {
-        try {
-          setProfile(await fetchProfile(s.user.id));
-        } catch {
+      try {
+        if (s?.user) {
+          const p = await fetchProfile(s.user.id);
+          if (active) setProfile(p);
+        } else if (active) {
           setProfile(null);
         }
-      } else {
-        setProfile(null);
+      } catch {
+        if (active) setProfile(null);
+      } finally {
+        if (active) setLoading(false);
       }
+    }
+
+    supabase.auth.getSession().then(({ data }) => resolve(data.session));
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+      // INITIAL_SESSION is already handled by getSession() above. For every
+      // other event, defer out of the callback so the auth lock is released
+      // before fetchProfile runs — this is what prevents the deadlock.
+      if (event === "INITIAL_SESSION") return;
+      setTimeout(() => resolve(s), 0);
     });
 
-    return () => sub.subscription.unsubscribe();
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string, captchaToken?: string) => {
