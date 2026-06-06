@@ -2,6 +2,9 @@
 .env
 .env.local
 .env.*.local
+# Backup files must never be versioned or packaged (may contain secrets)
+.env.bak
+*.bak
 
 # Python
 .venv/
