@@ -16,6 +16,7 @@ import Habits from "@/pages/Habits";
 import Diary from "@/pages/Diary";
 import Chat from "@/pages/Chat";
 import AgentPair from "@/pages/AgentPair";
+import Conta from "@/pages/Conta";
 
 export default function App() {
   return (
@@ -41,6 +42,7 @@ export default function App() {
         <Route path="financas" element={<Finances />} />
         <Route path="habitos" element={<Habits />} />
         <Route path="diario" element={<Diary />} />
+        <Route path="conta" element={<Conta />} />
         <Route
           path="chat"
           element={
