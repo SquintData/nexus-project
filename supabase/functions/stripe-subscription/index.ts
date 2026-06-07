@@ -18,7 +18,12 @@ const ALLOWED_ORIGINS = new Set(
 function corsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get("Origin") ?? "";
   const headers: Record<string, string> = {
-    "Access-Control-Allow-Headers": "authorization, content-type, apikey",
+    // supabase-js functions.invoke() always sends x-client-info (+ apikey) on
+    // top of authorization/content-type. Omitting x-client-info makes the CORS
+    // preflight fail, so the browser silently blocks the POST (only OPTIONS
+    // 200s show in logs). Keep this list in sync with what invoke sends.
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Vary": "Origin",
   };

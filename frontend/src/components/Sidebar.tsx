@@ -90,23 +90,25 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         })}
       </nav>
 
-      <div className="mt-5 pt-5 border-t border-white/[0.06]">
-        <div className="min-w-0 px-3 py-3 mb-2 rounded-xl bg-white/[0.02] border border-white/[0.05]">
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <span className="text-[10px] uppercase tracking-[0.2em] text-white/30">
+      <div className="mt-5 pt-4 border-t border-white/[0.06] space-y-1">
+        <div className="px-2 py-1.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-white/30">
               Conta
             </span>
             {profile && (
-              <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-white/[0.06] border border-white/10 text-white/70 whitespace-nowrap">
+              <span className="shrink-0 rounded-full border border-white/10 bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold text-white/70">
                 {planLabel(profile.plan_type)}
               </span>
             )}
           </div>
-          <div
-            className="block w-full truncate text-xs text-white/55"
-            title={user?.email ?? undefined}
-          >
-            {user?.email}
+          <div className="mt-2 min-w-0">
+            <p
+              className="truncate text-xs text-white/50"
+              title={user?.email ?? undefined}
+            >
+              {user?.email}
+            </p>
           </div>
         </div>
         <NavLink
