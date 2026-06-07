@@ -16,7 +16,7 @@ import {
   User,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { hasPlan } from "@/lib/planAccess";
+import { hasPlan, planLabel } from "@/lib/planAccess";
 import { cn } from "@/lib/cn";
 
 const NAV = [
@@ -90,12 +90,24 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         })}
       </nav>
 
-      <div className="mt-4 pt-4 border-t border-white/[0.06]">
-        <div className="px-2 mb-2">
-          <div className="text-[10px] uppercase tracking-[0.2em] text-white/30">
-            Conta
+      <div className="mt-5 pt-5 border-t border-white/[0.06]">
+        <div className="min-w-0 px-3 py-3 mb-2 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <span className="text-[10px] uppercase tracking-[0.2em] text-white/30">
+              Conta
+            </span>
+            {profile && (
+              <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-white/[0.06] border border-white/10 text-white/70 whitespace-nowrap">
+                {planLabel(profile.plan_type)}
+              </span>
+            )}
           </div>
-          <div className="text-xs text-white/55 truncate mt-1">{user?.email}</div>
+          <div
+            className="block w-full truncate text-xs text-white/55"
+            title={user?.email ?? undefined}
+          >
+            {user?.email}
+          </div>
         </div>
         <NavLink
           to="/app/conta"

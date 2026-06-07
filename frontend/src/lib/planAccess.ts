@@ -1,5 +1,18 @@
 const RANK: Record<string, number> = { free: 0, chat: 1, voice: 2 };
 
+// Human label per plan. Shared so the Sidebar badge and the Conta page never
+// drift. Unknown plan falls back to the raw key (see planLabel()).
+export const PLAN_LABEL: Record<string, string> = {
+  free: "Free",
+  chat: "Nexus Chat",
+  voice: "Nexus Voice",
+};
+
+export function planLabel(plan?: string | null): string {
+  if (!plan) return PLAN_LABEL.free;
+  return PLAN_LABEL[plan] ?? plan;
+}
+
 export function hasAccess(userPlan: string, required: string): boolean {
   return (RANK[userPlan] ?? 0) >= (RANK[required] ?? 0);
 }
