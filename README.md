@@ -1,112 +1,112 @@
-# Nexus — Assistente Pessoal Híbrido
+# Nexus
 
-Agente local Python (voz + automação de desktop) + interface web React + backend Supabase.
+Assistente pessoal que conecta um painel web de produtividade a um agente local de voz e automação no Windows.
 
-## Estrutura
+O projeto reúne interface em React e TypeScript, agente em Python e serviços de autenticação, persistência e IA por meio de Supabase e Edge Functions.
 
-```
-agent/      Python local agent (wake word, STT, LLM, TTS, desktop)
-frontend/   React + Vite + Tailwind (UI)
-supabase/   Migrations e referência de schema
-```
+## Visão geral
 
-## Pré-requisitos
+O painel organiza tarefas, compromissos, ideias, hábitos, diário, finanças e memória pessoal. O agente recebe comandos por voz ou mensagens do painel, consulta os dados do usuário e executa as ferramentas disponíveis.
 
-- **Python 3.11 ou 3.12** (3.14 pode quebrar `vosk`/`pyaudio` por falta de wheels). Verificar com `python --version`.
-- **Node.js 20+ LTS** — instale via [nodejs.org](https://nodejs.org/) ou `winget install OpenJS.NodeJS.LTS`.
-- Windows com microfone + speakers ativos.
+| Camada | Implementação |
+| --- | --- |
+| Interface | React 18, TypeScript, Vite e Tailwind CSS |
+| Agente local | Python, Vosk, Silero VAD e sounddevice |
+| Dados e autenticação | PostgreSQL, Supabase Auth e Realtime |
+| Integrações | Edge Functions para transcrição, LLM, síntese de voz e memória |
+| Assinaturas | Funções de integração com Stripe e controle de acesso por plano |
 
-## Setup
+## Recursos presentes no código
 
-### 1. Variáveis de ambiente
+- Painel com Kanban, agenda, ideias, hábitos, diário e finanças.
+- Chat com histórico de sessões e comunicação com o agente.
+- Pareamento do agente por código gerado no painel.
+- Detecção local da palavra de ativação e gravação do comando com detecção de silêncio.
+- Ferramentas para abrir aplicativos permitidos, URLs e rotinas cadastradas.
+- Criação e consulta de tarefas, eventos, hábitos, transações e memórias.
+- Proxies autenticados para chamadas de IA, sem exigir chaves dos provedores no agente.
 
-Copie `.env.example` → `.env` na raiz e em `frontend/`:
-
-```bash
-cp .env.example .env
-cp frontend/.env.example frontend/.env
-```
-
-Preencha com:
-- `SUPABASE_URL` / `SUPABASE_ANON_KEY` (já populados com o projeto Jarvis)
-- `GROQ_API_KEY`
-- `OPENAI_API_KEY`
-- `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` no frontend/.env
-- `VITE_TURNSTILE_SITEKEY` no frontend/.env (opcional em dev — só obrigatório em prod)
-
-Credenciais do agente (`AGENT_USER_EMAIL`, `AGENT_REFRESH_TOKEN`) são geradas
-automaticamente pelo fluxo de pareamento — basta criar a conta no frontend e
-rodar `python -m agent.main`; ele pede um código pareamento gerado em `/agente`.
-
-Para produção (deploy Vercel, Supabase Auth hardening, captcha), veja [DEPLOYMENT.md](DEPLOYMENT.md).
-
-### 2. Agente Python
-
-```bash
-cd agent
-python -m venv .venv
-.venv\Scripts\activate          # Windows
-pip install -r requirements.txt
-python -m agent.setup_models    # baixa modelo Vosk pt-BR (~30MB)
-python -m agent.main            # inicia loop: "Olá, Nexus" para ativar
-```
-
-Requisitos extras (Windows):
-- Microfone funcionando
-- Speakers funcionando
-- `pyaudio` precisa de Microsoft Visual C++ Build Tools (se falhar: `pip install pipwin && pipwin install pyaudio`)
-
-### 3. Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev   # http://localhost:5173
-```
-
-Crie uma conta na tela de login (sign-up) — o trigger `handle_new_user` cria o profile automaticamente. Depois vá em **Parear agente** no menu lateral, gere um código, e cole no terminal quando o agente pedir. Não precisa mais editar o `.env` à mão.
-
-### 4. Build do agente (.exe — opcional)
-
-```bash
-pip install pyinstaller
-pyinstaller --onefile --name nexus-agent agent/main.py
-```
-
-## Comandos de voz suportados (MVP)
-
-| Comando | Intent |
-|---|---|
-| "Abra o VS Code" | `open_app` |
-| "Abra youtube.com" | `open_url` |
-| "Crie uma tarefa: estudar Python" | `create_task` |
-| "Marque reunião amanhã às 14h" | `create_event` (pede data se faltar) |
-| "Salve uma ideia: ..." | `create_idea` |
-| "Modo Produtividade" | `run_routine` |
-| "Lembre que meu hobby é xadrez" | `store_memory` |
+Esses recursos descrevem a implementação disponível. O funcionamento integrado depende da configuração dos serviços, da conta e do plano; uma compilação do frontend não valida os fluxos de voz, pagamentos ou permissões.
 
 ## Arquitetura
 
+```mermaid
+flowchart TD
+    Mic[Microfone] --> Wake[Vosk: ativação local]
+    Wake --> VAD[Captura do comando e detecção de silêncio]
+    VAD --> Agent[Agente Python]
+    Agent --> Proxies[Edge Functions: STT, LLM, TTS e memória]
+    Proxies --> Providers[Provedores de IA]
+    Agent --> Desktop[Aplicativos permitidos e navegador]
+    Agent <--> Data[Supabase: Auth, PostgreSQL e Realtime]
+    Web[Painel React] <--> Data
+    Web --> Billing[Edge Functions de assinatura]
 ```
-[Microfone] → Vosk (local) → wake word detectado
-            → grava 5s → Groq Whisper (STT) → texto
-            → GPT-4o-mini (intent + params) → Action
-            → Supabase (persist) / Desktop (subprocess) / TTS
-            → OpenAI TTS → speakers
-                                     ↓
-                          Supabase Realtime
-                                     ↓
-                          Frontend React (auto-update)
+
+O frontend e o agente são componentes diferentes: abrir o painel não inicia o processo Python. A detecção da palavra de ativação é local; o processamento posterior utiliza serviços externos.
+
+## Estrutura
+
+```text
+agent/                  Agente, voz, ferramentas e comunicação com o backend
+frontend/               Aplicação React e configuração do frontend
+supabase/functions/     Proxies de IA e funções de assinatura
+supabase/migrations/    Evolução do banco e políticas de acesso
+setup.bat               Instalador do agente para Windows
+requirements.txt        Dependências Python
 ```
 
-## Stack
+O repositório [nexus-agent](https://github.com/SquintData/nexus-agent) distribui uma versão separada do agente. Ele não deve ser presumido idêntico ao diretório `agent/` deste repositório.
 
-- **Backend**: Supabase (Postgres, Auth, Realtime, Storage)
-- **Agente**: Python 3.11+, Vosk, Groq SDK, OpenAI SDK, sounddevice
-- **Frontend**: Vite, React 18, TypeScript, Tailwind, react-router-dom
+## Desenvolvimento
 
-## Segurança
+Requisitos: Node.js 20+, Python 3.11 ou 3.12 e Windows com microfone e saída de áudio para o agente.
 
-- RLS ativo em todas as tabelas: cada usuário só vê suas linhas
-- Áudio contínuo nunca sai da máquina (wake word offline via Vosk)
-- Apenas o comando pós-trigger é enviado às APIs
+### Frontend
+
+Na raiz do repositório:
+
+```powershell
+cd frontend
+npm ci
+Copy-Item .env.example .env
+npm run dev
+```
+
+Preencha as variáveis do arquivo `frontend/.env` para o backend desejado. A interface de desenvolvimento usa a porta padrão do Vite, `http://localhost:5173`.
+
+### Agente
+
+Em outro terminal, na raiz do repositório:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m agent.setup_models
+.\.venv\Scripts\python.exe -m agent.main
+```
+
+O agente solicita o código de pareamento quando necessário. O painel expõe essa função em `/app/agente`, sujeita ao acesso do plano. As chaves de OpenAI e Groq pertencem aos serviços do backend.
+
+Consulte [Desenvolvimento](docs/development.md) para configuração de um backend próprio e [Implantação](DEPLOYMENT.md) para os componentes necessários.
+
+## Verificações disponíveis
+
+```powershell
+cd frontend
+npm ci
+npm run lint
+npm run build
+```
+
+O script `lint` executa a checagem TypeScript. O workflow [Frontend CI](.github/workflows/frontend-ci.yml) configura checagem de tipos e build; seu gatilho de push está limitado a `main`, enquanto a branch padrão atual é `master`. Pull requests também estão configurados como gatilho.
+
+Não há suíte automatizada de testes do agente no snapshot atual. Voz, pareamento, atualização em tempo real e cobrança precisam de validação integrada separada.
+
+## Configuração e limites
+
+- O agente contém valores padrão do backend Nexus. Use `SUPABASE_URL` e `SUPABASE_ANON_KEY` para apontar para outro ambiente.
+- Tokens de pareamento e sessão são gravados no `.env` local. Não os inclua em commits.
+- Variáveis `VITE_*` são públicas no bundle; chaves privilegiadas e de provedores ficam no servidor.
+- Migrações de políticas de acesso estão versionadas; sua existência não substitui a validação do ambiente implantado.
+- Não há instalador executável ou garantia de funcionamento offline integral documentados neste repositório.
